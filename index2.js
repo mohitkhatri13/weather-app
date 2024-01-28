@@ -6,18 +6,19 @@ const grantAccessContainer = document.querySelector(".grant-location-container")
 const searchForm = document.querySelector("[data-searchform]");
 const loadingScreen = document.querySelector(".loading-container");
 const userInfoContainer = document.querySelector(".user-info-container");
+
 let oldTab = userTab;
 const API_KEY = "d1845658f92b31c64bd94f06f7188c9c";
-oldTab.classList.add("current-tab");
+oldTab.classList.add("current-tab");  //active class ka name ha current-tab ie. current-tab = active
 getfromSessionStorage();
 
 function switchTab(newTab) {
-    if(newTab != oldTab) {
+    if (newTab != oldTab) {
         oldTab.classList.remove("current-tab");
         oldTab = newTab;
         oldTab.classList.add("current-tab");
 
-        if(!searchForm.classList.contains("active")) {
+        if (!searchForm.classList.contains("active")) {
             //kya search form wala container is invisible, if yes then make it visible
             userInfoContainer.classList.remove("active");
             grantAccessContainer.classList.remove("active");
@@ -45,21 +46,26 @@ searchTab.addEventListener("click", () => {
 });
 
 //check if cordinates are already present in session storage
+
+//session storage neeche defined hai 
 function getfromSessionStorage() {
     const localCoordinates = sessionStorage.getItem("user-coordinates");
-    if(!localCoordinates) {
-        //agar local coordinates nahi mile
+    if (!localCoordinates) {
+        //agar local coordinates nahi mile session storage me matlab humne just login kiya hai location nahi di hai 
+        //to pehle location find karenge
         grantAccessContainer.classList.add("active");
     }
     else {
+        // means coordinated already present toh sidha api call kar sakte hai 
         const coordinates = JSON.parse(localCoordinates);
         fetchUserWeatherInfo(coordinates);
     }
 
 }
 
+
 async function fetchUserWeatherInfo(coordinates) {
-    const {lat, lon} = coordinates;
+    const { lat, lon } = coordinates;
     // make grantcontainer invisible
     grantAccessContainer.classList.remove("active");
     //make loader visible
@@ -69,16 +75,16 @@ async function fetchUserWeatherInfo(coordinates) {
     try {
         const response = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-          );
-        const  data = await response.json();
+        );
+        const data = await response.json();
 
         loadingScreen.classList.remove("active");
         userInfoContainer.classList.add("active");
         renderWeatherInfo(data);
     }
-    catch(err) {
+    catch (err) {
         loadingScreen.classList.remove("active");
-        //HW
+        alert('Oops! Something went wrong. Please try again later.');
 
     }
 
@@ -107,16 +113,14 @@ function renderWeatherInfo(weatherInfo) {
     windspeed.innerText = `${weatherInfo?.wind?.speed} m/s`;
     humidity.innerText = `${weatherInfo?.main?.humidity}%`;
     cloudiness.innerText = `${weatherInfo?.clouds?.all}%`;
-
-
 }
 
 function getLocation() {
-    if(navigator.geolocation) {
+    if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
     }
     else {
-        //HW - show an alert for no gelolocation support available
+        alert('Oops! Something went wrong. Please try again later.');
     }
 }
 
@@ -129,11 +133,16 @@ function showPosition(position) {
 
     sessionStorage.setItem("user-coordinates", JSON.stringify(userCoordinates));
     fetchUserWeatherInfo(userCoordinates);
-
 }
 
 const grantAccessButton = document.querySelector("[data-grantAccess]");
 grantAccessButton.addEventListener("click", getLocation);
+
+
+
+
+
+
 
 const searchInput = document.querySelector("[data-searchInput]");
 
@@ -141,9 +150,9 @@ searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
     let cityName = searchInput.value;
 
-    if(cityName === "")
+    if (cityName === "")
         return;
-    else 
+    else
         fetchSearchWeatherInfo(cityName);
 })
 
@@ -155,13 +164,14 @@ async function fetchSearchWeatherInfo(city) {
     try {
         const response = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
-          );
+        );
         const data = await response.json();
         loadingScreen.classList.remove("active");
         userInfoContainer.classList.add("active");
         renderWeatherInfo(data);
     }
-    catch(err) {
-        //hW
+    catch (err) {
+        
+        alert('Oops! Something went wrong. Please try again later.');
     }
 }
